@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
@@ -14,12 +14,17 @@ const page = () => {
     console.log("User data", session?.user);
   }, [session, status]);
 
+  const handleSignOut = async () => {
+    await signOut({callbackUrl:"/auth"})
+  }
+
   return (
     <div>
-      Welcome to dashboard
-      <Button variant="outline" onClick={() => router.push("/auth")}>
-        Button
+      Welcome {session?.user.name} to dashboard
+      <Button variant="outline" onClick={handleSignOut}>
+        Logout
       </Button>
+      
     </div>
   );
 };
