@@ -2,6 +2,8 @@ import { NextAuthOptions } from "next-auth";
 import Google from "next-auth/providers/google";
 import connectDb from "./db";
 import User from "@/model/user.model";
+import { DEFAULT_CATEGORIES } from "./defaultCategories";
+import Category from "@/model/category.model";
 
 const authOptions: NextAuthOptions = {
   providers: [
@@ -21,6 +23,12 @@ const authOptions: NextAuthOptions = {
             email: user?.email,
             image: user?.image,
           });
+
+          const categoiresToInsert = DEFAULT_CATEGORIES.map((cat) => ({
+            userId: existUser._id,
+            name: cat
+          }))
+          await Category.insertMany(categoiresToInsert)
         }
         user.id = existUser._id as string;
       }

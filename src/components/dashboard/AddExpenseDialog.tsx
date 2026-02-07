@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -14,13 +15,92 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type Category = {
+  _id: string;
+  name: string;
+};
+
 export default function AddExpenseDialog() {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState("");
 
-  const handleSave = () => {
-    console.log("Saving Expense:", { amount, note, date });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryId, setCategoryId] = useState("");
+
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  // fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+
+        const res = await fetch("/api/categories");
+        const data = await res.json();
+        console.log("categories",data)
+
+        if (res.ok) {
+          setCategories(data.categories || []);
+
+          
+          if (data.categories?.length > 0) {
+            setCategoryId(data.categories[0]._id);
+          }
+        } else {
+          console.log("Categories fetch failed:", data.message);
+        }
+      } catch (error) {
+        console.log("Categories fetch error:", error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleSave = async () => {
+    if (!amount || !date || !categoryId) {
+      alert("Amount, date and category are required!");
+      return;
+    }
+
+    const payload = {
+      amount: Number(amount),
+      note,
+      date,
+      categoryId,
+    };
+
+    console.log("Saving Expense:", payload);
+
+    const res = await fetch("/api/expenses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Expense saved successfully!");
+      setAmount("");
+      setNote("");
+      setDate("");
+    } else {
+      alert(data.message || "Expense save failed");
+    }
   };
 
   return (
@@ -36,11 +116,12 @@ export default function AddExpenseDialog() {
         <DialogHeader>
           <DialogTitle>Add New Expense</DialogTitle>
           <DialogDescription>
-            Enter your transaction details below.
+            Select category and enter your expense details.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Amount */}
           <Input
             type="number"
             placeholder="Amount"
@@ -48,12 +129,33 @@ export default function AddExpenseDialog() {
             onChange={(e) => setAmount(e.target.value)}
           />
 
+          {/* Category Dropdown */}
+          <Select value={categoryId} onValueChange={setCategoryId}>
+            <SelectTrigger>
+              <SelectValue
+                placeholder={
+                  loadingCategories ? "Loading categories..." : "Select category"
+                }
+              />
+            </SelectTrigger>
+
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat._id} value={cat._id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Note */}
           <Input
             placeholder="Note"
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
 
+          {/* Date */}
           <Input
             type="date"
             value={date}

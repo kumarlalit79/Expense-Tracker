@@ -7,9 +7,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     await connectDb();
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -41,7 +42,7 @@ export async function PUT(
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(
-      { id: params.id, userId: user._id },
+      { _id: id, userId: user._id },
       { name: name.trim() },
       { new: true },
     );
@@ -67,9 +68,10 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     await connectDb();
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -84,8 +86,11 @@ export async function DELETE(
       );
     }
 
+    console.log("PARAM ID:", id);
+    console.log("USER ID:", user._id);
+
     const deletedCategory = await Category.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       userId: user._id,
     });
 
