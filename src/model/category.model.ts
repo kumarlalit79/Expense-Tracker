@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 interface ICategory {
-  _id: mongoose.Types.ObjectId;
+  _id?: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   name: string;
 }
@@ -13,7 +13,7 @@ const categorySchema = new mongoose.Schema<ICategory>(
       ref: "User",
       required: true,
     },
-    name: { type: String, required: true },
+    name: { type: String, required: true, unique: true },
   },
   { timestamps: true },
 );
