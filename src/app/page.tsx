@@ -30,10 +30,10 @@ export default function DashboardPage() {
 
           <div className="grid gap-4 md:grid-cols-7">
             <SpendingChart refreshKey={refreshKey} />
-            <CategoryPieChart />
+            <CategoryPieChart refreshKey={refreshKey} />
           </div>
 
-          <RecentExpensesTable />
+          <RecentExpensesTable refreshKey={refreshKey} />
         </main>
       </div>
     </div>
