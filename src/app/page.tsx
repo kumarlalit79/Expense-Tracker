@@ -29,7 +29,7 @@ export default function DashboardPage() {
           <StatsCards refreshKey={refreshKey} />
 
           <div className="grid gap-4 md:grid-cols-7">
-            <SpendingChart />
+            <SpendingChart refreshKey={refreshKey} />
             <CategoryPieChart />
           </div>
 
