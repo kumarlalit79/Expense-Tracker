@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import axios from "axios";
 
 type Category = {
   _id: string;
@@ -44,19 +45,12 @@ export default function AddExpenseDialog() {
       try {
         setLoadingCategories(true);
 
-        const res = await fetch("/api/categories");
-        const data = await res.json();
-        console.log("categories",data)
+        const result = await axios.get("/api/categories");
 
-        if (res.ok) {
-          setCategories(data.categories || []);
-
-          
-          if (data.categories?.length > 0) {
-            setCategoryId(data.categories[0]._id);
-          }
-        } else {
-          console.log("Categories fetch failed:", data.message);
+        console.log("dashboard categories", result.data.allCategory);
+        setCategories(result.data.allCategory || []);
+        if (result.data.allCategory?.length > 0) {
+          setCategoryId(result.data.allCategory[0]._id);
         }
       } catch (error) {
         console.log("Categories fetch error:", error);
@@ -131,15 +125,17 @@ export default function AddExpenseDialog() {
 
           {/* Category Dropdown */}
           <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue
                 placeholder={
-                  loadingCategories ? "Loading categories..." : "Select category"
+                  loadingCategories
+                    ? "Loading categories..."
+                    : "Select category"
                 }
               />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="w-full">
               {categories.map((cat) => (
                 <SelectItem key={cat._id} value={cat._id}>
                   {cat.name}
