@@ -29,7 +29,7 @@ type Category = {
   name: string;
 };
 
-export default function AddExpenseDialog() {
+export default function AddExpenseDialog({onExpenseAdded}: any) {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState("");
@@ -39,6 +39,17 @@ export default function AddExpenseDialog() {
 
   const [loadingCategories, setLoadingCategories] = useState(false);
 
+  const [expenses, setExpenses] = useState<any[]>([]);
+
+  const fetchAllExpense = async () => {
+    try {
+      const result = await axios.get("/api/expenses");
+      console.log("fetchAllExpense", result.data.expenses);
+      setExpenses(result.data.expenses);
+    } catch (error) {
+      console.log("Fetch all expense error", error);
+    }
+  };
   // fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
@@ -60,6 +71,7 @@ export default function AddExpenseDialog() {
     };
 
     fetchCategories();
+    onExpenseAdded()
   }, []);
 
   const handleSave = async () => {
@@ -92,6 +104,8 @@ export default function AddExpenseDialog() {
       setAmount("");
       setNote("");
       setDate("");
+      fetchAllExpense();
+      onExpenseAdded(); 
     } else {
       alert(data.message || "Expense save failed");
     }
@@ -155,6 +169,7 @@ export default function AddExpenseDialog() {
           <Input
             type="date"
             value={date}
+            max={new Date().toISOString().split("T")[0]}
             onChange={(e) => setDate(e.target.value)}
           />
 
